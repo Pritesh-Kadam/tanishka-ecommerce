@@ -1,0 +1,21 @@
+# Ignore OS and IDE stuff
+.DS_Store
+*.log
+*.class
+*.iml
+*.env
+
+# Node
+node_modules/
+npm-debug.log
+
+# Java / Maven
+target/
+*.jar
+
+# VSCode
+.vscode/
+
+# Docker
+*.pid
+/.metadata/
