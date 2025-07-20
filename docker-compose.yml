@@ -1,0 +1,116 @@
+version: '3.8'
+
+networks:
+  tanishka-net:
+    driver: bridge
+
+volumes:
+  mongo-data:
+  pg-auth:
+  pg-order:
+
+services:
+
+  # ====================== DATABASES ======================
+  auth-db:
+    image: postgres:17
+    container_name: auth-db
+    restart: always
+    environment:
+      POSTGRES_DB: authdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5433:5432"
+    networks:
+      - tanishka-net
+    volumes:
+      - pg-auth:/var/lib/postgresql/data
+
+  order-db:
+    image: postgres:17
+    container_name: order-db
+    restart: always
+    environment:
+      POSTGRES_DB: orderdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5434:5432"
+    networks:
+      - tanishka-net
+    volumes:
+      - pg-order:/var/lib/postgresql/data
+
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    networks:
+      - tanishka-net
+    volumes:
+      - mongo-data:/data/db
+
+  # ====================== KAFKA ======================
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    ports:
+      - "2181:2181"
+    networks:
+      - tanishka-net
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    networks:
+      - tanishka-net
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+    container_name: kafka-ui
+    ports:
+      - "8088:8080"
+    networks:
+      - tanishka-net
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    depends_on:
+      - kafka
+
+  # ====================== FUTURE SERVICES (SAMPLE) ======================
+  # auth-service:
+  #   build:
+  #     context: ./auth-service
+  #   ports:
+  #     - "8081:8081"
+  #   networks:
+  #     - tanishka-net
+  #   depends_on:
+  #     - auth-db
+  #     - kafka
+
+  # gateway:
+  #   build:
+  #     context: ./gateway
+  #   ports:
+  #     - "8080:8080"
+  #   networks:
+  #     - tanishka-net
+  #   depends_on:
+  #     - auth-service
