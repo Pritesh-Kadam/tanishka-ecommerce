@@ -76,6 +76,18 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.mockito</groupId>
+					<artifactId>mockito-core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- JUnit- Mockito -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<!-- Spring Security -->
 		<dependency>
@@ -137,7 +149,7 @@
 			<artifactId>spring-webmvc</artifactId>
 			<version>6.1.6</version>
 		</dependency>
-		
+
 		<!--Kafka -->
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
